@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<title>Petualangan Pecahan - Kelas 5</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, 'Segoe UI', 'Poppins', sans-serif;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+
+    html, body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #0a0e1a;
+        color: #e0e6f0;
+        position: fixed;
+        touch-action: manipulation;
+    }
+
+    .screen {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        padding: 2vh 2vw;
+        flex-direction: column;
+        animation: fadeIn 0.4s ease;
+        overflow: hidden;
+    }
+
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Starfield */
+    .stars {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    }
+
+    .star {
+        position: absolute;
+        background: #fff;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    /* ============ CHARACTER SELECT ============ */
+    .char-select-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5vh;
+        z-index: 1;
+        padding: 2vh 0;
+    }
+
+    .char-title {
+        font-size: clamp(20px, 5.5vw, 32px);
+        font-weight: 900;
+        background: linear-gradient(135deg, #f7971e, #ffd200, #ff6b9d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+
+    .char-subtitle {
+        color: #8ba3c7;
+        font-size: clamp(11px, 3vw, 14px);
+        text-align: center;
+        margin-bottom: 1vh;
+        padding: 0 5vw;
+    }
+
+    .char-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3vw;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .char-card {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 18px;
+        padding: 2vh 2vw;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .char-card:active {
+        border-color: #ffd200;
+        transform: scale(0.96);
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+    }
+
+    .char-avatar {
+        font-size: clamp(38px, 10vw, 60px);
+        margin-bottom: 0.6vh;
+        display: block;
+        filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.5));
+    }
+
+    .char-name {
+        font-size: clamp(13px, 3.5vw, 17px);
+        font-weight: 900;
+        color: #ffd200;
+        margin-bottom: 0.3vh;
+    }
+
+    .char-desc {
+        font-size: clamp(9px, 2.4vw, 11px);
+        color: #8ba3c7;
+        line-height: 1.3;
+    }
+
+    /* ============ MAIN MENU ============ */
+    .menu-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5vh;
+        z-index: 1;
+        padding: 1vh 0;
+    }
+
+    .player-info {
+        display: flex;
+        align-items: center;
+        gap: 2vw;
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 50px;
+        padding: 0.8vh 4vw;
+        margin-bottom: 0.5vh;
+    }
+
+    .player-info .avatar {
+        font-size: clamp(24px, 7vw, 36px);
+        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+    }
+
+    .player-info .info-text {
+        font-size: clamp(10px, 2.8vw, 13px);
+        color: #8ba3c7;
+        line-height: 1.3;
+    }
+
+    .player-info .info-text strong {
+        color: #ffd200;
+        font-size: clamp(12px, 3.2vw, 15px);
+    }
+
+    .menu-title {
+        font-size: clamp(20px, 5.5vw, 32px);
+        font-weight: 900;
+        background: linear-gradient(135deg, #f7971e, #ffd200, #ff6b9d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        letter-spacing: 1px;
+        padding: 0 3vw;
+    }
+
+    .menu-subtitle {
+        color: #8ba3c7;
+        font-size: clamp(10px, 2.8vw, 13px);
+        text-align: center;
+        margin-bottom: 0.5vh;
+    }
+
+    .topic-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5vw;
+        width: 95%;
+        max-width: 500px;
+    }
+
+    .topic-card {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 16px;
+        padding: 1.5vh 2vw;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5vh;
+        min-height: 110px;
+        justify-content: center;
+    }
+
+    .topic-card:active {
+        border-color: #ffd200;
+        transform: scale(0.96);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .topic-icon {
+        font-size: clamp(28px, 8vw, 42px);
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+    }
+
+    .topic-title {
+        font-size: clamp(10px, 2.8vw, 13px);
+        font-weight: 900;
+        color: #ffd200;
+        line-height: 1.2;
+    }
+
+    .topic-desc {
+        font-size: clamp(8px, 2.2vw, 10px);
+        color: #8ba3c7;
+        line-height: 1.3;
+    }
+
+    .topic-badge {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        background: #ff6b9d;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .btn-menu-action {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #0a0e1a;
+        border: none;
+        padding: 1.2vh 6vw;
+        font-size: clamp(12px, 3.2vw, 15px);
+        font-weight: 900;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.25s;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        margin-top: 0.5vh;
+    }
+
+    .btn-menu-action:active {
+        transform: scale(0.96);
+    }
+
+    /* ============ MATERIAL SCREEN ============ */
+    .material-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1vh;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .material-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 14px;
+        padding: 1vh 3vw;
+        gap: 2vw;
+    }
+
+    .material-header h2 {
+        font-size: clamp(11px, 3vw, 14px);
+        color: #ffd200;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 2vw;
+        line-height: 1.2;
+        flex: 1;
+    }
+
+    .material-header h2 span:first-child {
+        font-size: clamp(18px, 5vw, 24px);
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #ff6b9d, #c44d7a);
+        color: #fff;
+        border: none;
+        padding: 0.8vh 3vw;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: clamp(10px, 2.6vw, 12px);
+        font-weight: 800;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .btn-back:active { transform: scale(0.94); }
+
+    .material-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1vh;
+        overflow: hidden;
+    }
+
+    .material-visual {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 14px;
+        padding: 1.5vh 2vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1vh;
+        flex-shrink: 0;
+    }
+
+    .frac-demo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2vw;
+        flex-wrap: nowrap;
+    }
+
+    .circle-frac {
+        width: clamp(45px, 12vw, 65px);
+        height: clamp(45px, 12vw, 65px);
+        border-radius: 50%;
+        position: relative;
+        background: #fff;
+        border: 2.5px solid #ffd200;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .circle-frac svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    .frac-label {
+        font-size: clamp(14px, 4vw, 20px);
+        font-weight: 900;
+        color: #ffd200;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1;
+    }
+
+    .frac-label .num {
+        border-bottom: 2px solid #ffd200;
+        padding: 0 6px 2px 6px;
+    }
+
+    .frac-label .den {
+        padding: 2px 6px 0 6px;
+    }
+
+    .operator {
+        font-size: clamp(20px, 5.5vw, 28px);
+        font-weight: 900;
+        color: #ff6b9d;
+    }
+
+    .visual-caption {
+        font-size: clamp(9px, 2.4vw, 11px);
+        color: #8ba3c7;
+        text-align: center;
+        font-style: italic;
+        background: rgba(255, 215, 0, 0.08);
+        padding: 0.6vh 3vw;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        line-height: 1.3;
+    }
+
+    .material-text {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 14px;
+        padding: 1.5vh 3vw;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8vh;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .material-text::-webkit-scrollbar { width: 4px; }
+    .material-text::-webkit-scrollbar-thumb { background: #ffd200; border-radius: 10px; }
+
+    .material-text h3 {
+        font-size: clamp(11px, 3vw, 14px);
+        color: #ff6b9d;
+        font-weight: 900;
+        margin-bottom: 0.2vh;
+    }
+
+    .material-text p {
+        font-size: clamp(10px, 2.6vw, 12px);
+        line-height: 1.6;
+        color: #c5d3e8;
+    }
+
+    .material-text .highlight {
+        color: #ffd200;
+        font-weight: 800;
+    }
+
+    .material-text .example-box {
+        background: rgba(255, 215, 0, 0.08);
+        border-left: 3px solid #ffd200;
+        border-radius: 8px;
+        padding: 0.8vh 2.5vw;
+        font-size: clamp(9px, 2.4vw, 11px);
+        color: #c5d3e8;
+        line-height: 1.6;
+    }
+
+    .btn-start-quiz {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #0a0e1a;
+        border: none;
+        padding: 1.3vh 4vw;
+        border-radius: 50px;
+        font-size: clamp(12px, 3.2vw, 15px);
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.25s;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    .btn-start-quiz:active {
+        transform: scale(0.96);
+    }
+
+    /* ============ QUIZ SCREEN ============ */
+    .quiz-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8vh;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 12px;
+        padding: 0.8vh 2.5vw;
+        gap: 2vw;
+        flex-shrink: 0;
+    }
+
+    .quiz-header-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .quiz-progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: clamp(9px, 2.4vw, 11px);
+        color: #8ba3c7;
+        margin-bottom: 0.4vh;
+        font-weight: 700;
+    }
+
+    .quiz-progress-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #f7971e, #ffd200, #ff6b9d);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .quiz-scores-mini {
+        display: flex;
+        gap: 1.5vw;
+        flex-shrink: 0;
+    }
+
+    .score-mini {
+        background: rgba(0, 245, 212, 0.1);
+        border: 1px solid rgba(0, 245, 212, 0.4);
+        padding: 0.4vh 2vw;
+        border-radius: 20px;
+        font-size: clamp(9px, 2.4vw, 11px);
+        font-weight: 800;
+        color: #00f5d4;
+        white-space: nowrap;
+    }
+
+    .score-mini.wrong {
+        background: rgba(255, 87, 87, 0.1);
+        border-color: rgba(255, 87, 87, 0.4);
+        color: #ff5757;
+    }
+
+    .score-mini.pulse {
+        animation: scorePulse 0.5s ease;
+    }
+
+    @keyframes scorePulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); box-shadow: 0 0 15px currentColor; }
+        100% { transform: scale(1); }
+    }
+
+    .quiz-visual-mini {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 2px solid #2a3a52;
+        border-radius: 12px;
+        padding: 1vh 2vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6vh;
+        flex-shrink: 0;
+    }
+
+    .quiz-visual-mini.flash-correct {
+        animation: flashCorrect 0.7s ease;
+    }
+
+    .quiz-visual-mini.flash-wrong {
+        animation: flashWrong 0.7s ease;
+    }
+
+    @keyframes flashCorrect {
+        0%, 100% { background: linear-gradient(145deg, #1a2332, #0f1620); }
+        50% { background: linear-gradient(145deg, #0a4a3f, #063d2e); }
+    }
+
+    @keyframes flashWrong {
+        0%, 100% { background: linear-gradient(145deg, #1a2332, #0f1620); }
+        50% { background: linear-gradient(145deg, #4a0a0a, #3d0606); }
+    }
+
+    .quiz-visual-mini .frac-demo {
+        gap: 2vw;
+    }
+
+    .quiz-visual-mini .circle-frac {
+        width: clamp(38px, 10vw, 55px);
+        height: clamp(38px, 10vw, 55px);
+        border-width: 2px;
+    }
+
+    .quiz-visual-mini .frac-label {
+        font-size: clamp(12px, 3.5vw, 16px);
+    }
+
+    .quiz-visual-mini .operator {
+        font-size: clamp(16px, 4.5vw, 22px);
+    }
+
+    .quiz-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8vh;
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    .quiz-question-text {
+        font-size: clamp(11px, 3vw, 14px);
+        font-weight: 700;
+        color: #e0e6f0;
+        line-height: 1.4;
+        background: rgba(255, 215, 0, 0.06);
+        padding: 1vh 3vw;
+        border-radius: 12px;
+        border-left: 3px solid #ffd200;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .quiz-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2vw;
+        flex-shrink: 0;
+    }
+
+    .quiz-option {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid #2a3a52;
+        border-radius: 12px;
+        padding: 1.2vh 2vw;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 2vw;
+        font-size: clamp(11px, 3vw, 14px);
+        color: #e0e6f0;
+        font-weight: 700;
+        text-align: left;
+        min-height: 48px;
+    }
+
+    .quiz-option:active:not(:disabled) {
+        border-color: #ffd200;
+        background: rgba(255, 215, 0, 0.12);
+        transform: scale(0.97);
+    }
+
+    .quiz-option .opt-label {
+        width: clamp(22px, 6vw, 30px);
+        height: clamp(22px, 6vw, 30px);
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #0a0e1a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: clamp(10px, 2.8vw, 13px);
+        flex-shrink: 0;
+    }
+
+    .quiz-option.correct {
+        background: linear-gradient(135deg, #00f5d4, #00bbf9);
+        color: #0a0e1a;
+        border-color: #00f5d4;
+        animation: pop 0.5s ease;
+        box-shadow: 0 0 20px rgba(0, 245, 212, 0.6);
+    }
+
+    .quiz-option.correct .opt-label {
+        background: #0a0e1a;
+        color: #00f5d4;
+    }
+
+    .quiz-option.wrong {
+        background: linear-gradient(135deg, #ff5757, #c92a2a);
+        color: #fff;
+        border-color: #ff5757;
+        animation: shake 0.5s ease;
+        box-shadow: 0 0 20px rgba(255, 87, 87, 0.6);
+    }
+
+    .quiz-option.wrong .opt-label {
+        background: #fff;
+        color: #ff5757;
+    }
+
+    .quiz-option:disabled { cursor: not-allowed; }
+
+    @keyframes pop {
+        0% { transform: scale(1); }
+        30% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    .quiz-feedback {
+        padding: 0.8vh 2.5vw;
+        border-radius: 10px;
+        font-size: clamp(9px, 2.4vw, 11px);
+        line-height: 1.4;
+        display: none;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .quiz-feedback.show {
+        display: block;
+        animation: feedbackPop 0.4s ease;
+    }
+
+    @keyframes feedbackPop {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .quiz-feedback.benar {
+        background: linear-gradient(135deg, rgba(0, 245, 212, 0.25), rgba(0, 187, 249, 0.25));
+        border: 2px solid #00f5d4;
+        color: #00f5d4;
+    }
+
+    .quiz-feedback.salah {
+        background: linear-gradient(135deg, rgba(255, 87, 87, 0.25), rgba(201, 42, 42, 0.25));
+        border: 2px solid #ff5757;
+        color: #ff5757;
+    }
+
+    .quiz-feedback .feedback-title {
+        font-size: clamp(11px, 3vw, 14px);
+        font-weight: 900;
+        display: block;
+        margin-bottom: 0.2vh;
+    }
+
+    .hint-box {
+        background: rgba(255, 107, 157, 0.15);
+        border: 2px dashed #ff6b9d;
+        border-radius: 10px;
+        padding: 0.8vh 2.5vw;
+        font-size: clamp(9px, 2.4vw, 11px);
+        color: #ffb8d1;
+        line-height: 1.4;
+        display: none;
+        flex-shrink: 0;
+    }
+
+    .hint-box.show { display: block; }
+
+    .quiz-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5vw;
+        flex-shrink: 0;
+    }
+
+    .btn-quiz {
+        padding: 1.2vh 2vw;
+        border: none;
+        border-radius: 10px;
+        font-size: clamp(10px, 2.8vw, 13px);
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+    }
+
+    .btn-hint {
+        background: linear-gradient(135deg, #ff6b9d, #c44d7a);
+        color: #fff;
+    }
+
+    .btn-hint:active { transform: scale(0.96); }
+
+    .btn-next {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #0a0e1a;
+    }
+
+    .btn-next:active:not(:disabled) { transform: scale(0.96); }
+    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ============ FULLSCREEN FEEDBACK ============ */
+    .feedback-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        pointer-events: none;
+        flex-direction: column;
+        gap: 1vh;
+    }
+
+    .feedback-overlay.show {
+        display: flex;
+        animation: overlayFade 1.3s ease forwards;
+    }
+
+    @keyframes overlayFade {
+        0% { opacity: 0; transform: scale(0.5); }
+        15% { opacity: 1; transform: scale(1.05); }
+        25% { transform: scale(1); }
+        80% { opacity: 1; }
+        100% { opacity: 0; transform: scale(1.1); }
+    }
+
+    .feedback-overlay .big-emoji {
+        font-size: clamp(90px, 25vw, 180px);
+        animation: bigEmojiBounce 1.3s ease;
+        filter: drop-shadow(0 0 30px currentColor);
+    }
+
+    @keyframes bigEmojiBounce {
+        0% { transform: scale(0) rotate(-180deg); }
+        50% { transform: scale(1.3) rotate(10deg); }
+        100% { transform: scale(1) rotate(0); }
+    }
+
+    .feedback-overlay .big-text {
+        font-size: clamp(22px, 7vw, 42px);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 25px currentColor;
+        text-align: center;
+        padding: 0 5vw;
+    }
+
+    .feedback-overlay .big-points {
+        font-size: clamp(16px, 5vw, 28px);
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffd200, #f7971e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .feedback-overlay.correct .big-emoji,
+    .feedback-overlay.correct .big-text { color: #00f5d4; }
+
+    .feedback-overlay.wrong .big-emoji,
+    .feedback-overlay.wrong .big-text { color: #ff5757; }
+
+    /* ============ RESULT ============ */
+    .result-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5vh;
+        z-index: 1;
+        padding: 2vh 0;
+    }
+
+    .result-card {
+        background: linear-gradient(145deg, #1a2332, #0f1620);
+        border: 3px solid #ffd200;
+        border-radius: 22px;
+        padding: 3vh 5vw;
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 20px 50px rgba(255, 215, 0, 0.3);
+    }
+
+    .result-trophy {
+        font-size: clamp(60px, 16vw, 100px);
+        margin-bottom: 1vh;
+        animation: bounce 2s infinite;
+        filter: drop-shadow(0 0 25px rgba(255, 200, 87, 0.6));
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    .result-title {
+        font-size: clamp(20px, 5.5vw, 28px);
+        font-weight: 900;
+        background: linear-gradient(135deg, #f7971e, #ffd200, #ff6b9d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1vh;
+    }
+
+    .result-message {
+        font-size: clamp(11px, 3vw, 14px);
+        color: #8ba3c7;
+        line-height: 1.5;
+        margin-bottom: 2vh;
+    }
+
+    .result-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2vw;
+        margin: 2vh 0;
+    }
+
+    .result-stat {
+        background: rgba(255, 215, 0, 0.08);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 12px;
+        padding: 1.5vh 1vw;
+    }
+
+    .result-stat .value {
+        font-size: clamp(18px, 5vw, 26px);
+        font-weight: 900;
+        color: #ffd200;
+        display: block;
+        margin-bottom: 0.3vh;
+    }
+
+    .result-stat .label {
+        font-size: clamp(8px, 2.2vw, 10px);
+        color: #8ba3c7;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .result-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2vw;
+        margin-top: 1.5vh;
+    }
+
+    .btn-result {
+        padding: 1.4vh 2vw;
+        border: none;
+        border-radius: 50px;
+        font-size: clamp(11px, 3vw, 14px);
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+    }
+
+    .btn-result.primary {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #0a0e1a;
+    }
+
+    .btn-result.secondary {
+        background: rgba(255, 107, 157, 0.2);
+        color: #ff6b9d;
+        border: 2px solid #ff6b9d;
+    }
+
+    .btn-result:active { transform: scale(0.96); }
+
+    /* ============ CONFETTI ============ */
+    .confetti {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        z-index: 998;
+        pointer-events: none;
+        animation: confettiFall 2.5s linear forwards;
+    }
+
+    @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .screen-shake {
+        animation: screenShake 0.4s ease;
+    }
+
+    @keyframes screenShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+
+    /* ============ LANDSCAPE HINT ============ */
+    @media (orientation: landscape) and (max-height: 500px) {
+        .char-grid { grid-template-columns: repeat(4, 1fr); max-width: 90%; gap: 1.5vw; }
+        .char-avatar { font-size: clamp(30px, 8vh, 50px); }
+        .topic-grid { grid-template-columns: repeat(4, 1fr); max-width: 95%; }
+        .topic-card { min-height: 80px; padding: 1vh 1vw; }
+        .topic-icon { font-size: clamp(22px, 6vh, 32px); }
+        .quiz-options { grid-template-columns: 1fr 1fr; }
+        .material-body { flex-direction: row; }
+        .material-visual { flex: 0 0 40%; }
+        .material-text { flex: 1; }
+    }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- Fullscreen Feedback -->
+<div class="feedback-overlay" id="feedbackOverlay">
+    <div class="big-emoji" id="fbEmoji">✅</div>
+    <div class="big-text" id="fbText">BENAR!</div>
+    <div class="big-points" id="fbPoints">+10 POIN</div>
+</div>
+
+<!-- Character Select -->
+<div class="screen active" id="screenChar">
+    <div class="char-select-wrapper">
+        <div class="char-title">🍕 PILIH TOKOHMU</div>
+        <div class="char-subtitle">Pilih tokoh petualangan pecahanmu!</div>
+        <div class="char-grid">
+            <div class="char-card" onclick="selectChar('Adam')">
+                <span class="char-avatar">👦</span>
+                <div class="char-name">ADAM</div>
+                <div class="char-desc">Pemberani</div>
+            </div>
+            <div class="char-card" onclick="selectChar('Ara')">
+                <span class="char-avatar">👧</span>
+                <div class="char-name">ARA</div>
+                <div class="char-desc">Cerdas</div>
+            </div>
+            <div class="char-card" onclick="selectChar('Bilqis')">
+                <span class="char-avatar">🧕</span>
+                <div class="char-name">BILQIS</div>
+                <div class="char-desc">Sabar</div>
+            </div>
+            <div class="char-card" onclick="selectChar('Kesha')">
+                <span class="char-avatar">👩‍🦱</span>
+                <div class="char-name">KESHA</div>
+                <div class="char-desc">Ceria</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Menu -->
+<div class="screen" id="screenMenu">
+    <div class="menu-wrapper">
+        <div class="player-info">
+            <span class="avatar" id="playerAvatar">👦</span>
+            <div class="info-text">
+                Halo, <strong id="playerName">Adam</strong>!<br>
+                Ayo belajar pecahan!
+            </div>
+        </div>
+        <div class="menu-title">🍕 PETUALANGAN PECAHAN</div>
+        <div class="menu-subtitle">Pilih materi latihanmu:</div>
+        <div class="topic-grid">
+            <div class="topic-card" onclick="openMaterial(0)">
+                <span class="topic-icon">➕</span>
+                <div class="topic-title">Tambah<br>Penyebut Sama</div>
+                <div class="topic-badge">1</div>
+            </div>
+            <div class="topic-card" onclick="openMaterial(1)">
+                <span class="topic-icon">➕</span>
+                <div class="topic-title">Tambah<br>Penyebut Beda</div>
+                <div class="topic-badge">2</div>
+            </div>
+            <div class="topic-card" onclick="openMaterial(2)">
+                <span class="topic-icon">➖</span>
+                <div class="topic-title">Kurang<br>Penyebut Sama</div>
+                <div class="topic-badge">3</div>
+            </div>
+            <div class="topic-card" onclick="openMaterial(3)">
+                <span class="topic-icon">➖</span>
+                <div class="topic-title">Kurang<br>Penyebut Beda</div>
+                <div class="topic-badge">4</div>
+            </div>
+        </div>
+        <button class="btn-menu-action" onclick="changeCharacter()">🔄 Ganti Tokoh</button>
+    </div>
+</div>
+
+<!-- Material -->
+<div class="screen" id="screenMaterial">
+    <div class="material-wrapper">
+        <div class="material-header">
+            <h2><span id="matIcon">➕</span><span id="matTitle">Penjumlahan Penyebut Sama</span></h2>
+            <button class="btn-back" onclick="backToMenu()">🏠</button>
+        </div>
+        <div class="material-body">
+            <div class="material-visual">
+                <div class="frac-demo" id="matVisual"></div>
+                <div class="visual-caption" id="matVisualLabel"></div>
+            </div>
+            <div class="material-text" id="matText"></div>
+        </div>
+        <button class="btn-start-quiz" onclick="startQuiz()">🎯 Mulai Latihan (15 Soal)</button>
+    </div>
+</div>
+
+<!-- Quiz -->
+<div class="screen" id="screenQuiz">
+    <div class="quiz-wrapper">
+        <div class="quiz-header">
+            <div class="quiz-header-left">
+                <div class="quiz-progress-label">
+                    <span id="qProgressText">1/15</span>
+                    <span id="qTopicLabel">P. Sama</span>
+                </div>
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="qProgressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="quiz-scores-mini">
+                <div class="score-mini" id="scoreBenar">✅ <span id="qBenar">0</span></div>
+                <div class="score-mini wrong" id="scoreSalah">❌ <span id="qSalah">0</span></div>
+            </div>
+            <button class="btn-back" onclick="backToMenu()">🏠</button>
+        </div>
+
+        <div class="quiz-visual-mini" id="quizVisualBox">
+            <div class="frac-demo" id="quizVisual"></div>
+        </div>
+
+        <div class="quiz-content">
+            <div class="quiz-question-text" id="quizQText">Loading...</div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="hint-box" id="quizHint"></div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+        </div>
+
+        <div class="quiz-actions">
+            <button class="btn-quiz btn-hint" onclick="showQuizHint()">💡 Petunjuk</button>
+            <button class="btn-quiz btn-next" id="btnQuizNext" onclick="nextQuizQuestion()" disabled>➡️ Lanjut</button>
+        </div>
+    </div>
+</div>
+
+<!-- Result -->
+<div class="screen" id="screenResult">
+    <div class="result-wrapper">
+        <div class="result-card">
+            <div class="result-trophy" id="resultTrophy">🏆</div>
+            <div class="result-title" id="resultTitle">SELAMAT!</div>
+            <div class="result-message" id="resultMessage"></div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <span class="value" id="resultBenar">0</span>
+                    <span class="label">Benar</span>
+                </div>
+                <div class="result-stat">
+                    <span class="value" id="resultSalah">0</span>
+                    <span class="label">Salah</span>
+                </div>
+                <div class="result-stat">
+                    <span class="value" id="resultSkor">0</span>
+                    <span class="label">Skor</span>
+                </div>
+            </div>
+            <div class="result-actions">
+                <button class="btn-result primary" onclick="retryQuiz()">🔄 Ulangi</button>
+                <button class="btn-result secondary" onclick="backToMenu()">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================================================================
+// STARFIELD
+// ================================================================
+(function createStars() {
+    const container = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        const size = Math.random() * 2 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        container.appendChild(star);
+    }
+})();
+
+// ================================================================
+// FRACTION RENDERER
+// ================================================================
+function renderCircleFraction(numerator, denominator, color = '#ffd200') {
+    if (denominator > 12) return renderBarFraction(numerator, denominator, color);
+
+    const size = 100;
+    const center = size / 2;
+    const radius = 44;
+    const anglePerSlice = 360 / denominator;
+
+    let svg = `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+    for (let i = 0; i < denominator; i++) {
+        const startAngle = (i * anglePerSlice) * Math.PI / 180;
+        const endAngle = ((i + 1) * anglePerSlice) * Math.PI / 180;
+        const x1 = center + radius * Math.cos(startAngle);
+        const y1 = center + radius * Math.sin(startAngle);
+        const x2 = center + radius * Math.cos(endAngle);
+        const y2 = center + radius * Math.sin(endAngle);
+        const largeArc = anglePerSlice > 180 ? 1 : 0;
+        const path = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+        const fill = i < numerator ? color : 'rgba(255,255,255,0.05)';
+        svg += `<path d="${path}" fill="${fill}" stroke="rgba(255,215,0,0.5)" stroke-width="1"/>`;
+    }
+    svg += `</svg>`;
+    return `<div class="circle-frac">${svg}</div>`;
+}
+
+function renderBarFraction(numerator, denominator, color = '#ffd200') {
+    let html = `<div style="display:flex;gap:1.5px;background:#fff;padding:3px;border-radius:8px;border:2.5px solid ${color};box-shadow:0 0 15px rgba(255,215,0,0.4);">`;
+    for (let i = 0; i < denominator; i++) {
+        const bg = i < numerator ? color : 'rgba(200,200,200,0.2)';
+        html += `<div style="width:clamp(6px,1.8vw,10px);height:clamp(35px,9vw,55px);background:${bg};border-radius:3px;"></div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function renderFractionLabel(numerator, denominator) {
+    return `<div class="frac-label"><span class="num">${numerator}</span><span class="den">${denominator}</span></div>`;
+}
+
+// ================================================================
+// CHARACTERS
+// ================================================================
+const characters = {
+    'Adam': { avatar: '👦' },
+    'Ara': { avatar: '👧' },
+    'Bilqis': { avatar: '🧕' },
+    'Kesha': { avatar: '👩‍🦱' }
+};
+
+// ================================================================
+// MATERIALS
+// ================================================================
+const materials = [
+    {
+        title: "Penjumlahan Penyebut Sama",
+        icon: "➕",
+        demo: { n1: 1, d1: 4, op: '+', n2: 2, d2: 4, result: { n: 3, d: 4 } },
+        visualLabel: "1/4 + 2/4 = 3/4",
+        content: `
+            <h3>🍕 Penyebut Sama</h3>
+            <p>Jika penyebut <span class="highlight">sama</span>, jumlahkan pembilangnya saja. Penyebut tetap.</p>
+            <h3>📝 Rumus</h3>
+            <div class="example-box"><strong>a/c + b/c = (a+b)/c</strong></div>
+            <h3>💡 Contoh</h3>
+            <div class="example-box">1/4 + 2/4 = 3/4<br>2/5 + 1/5 = 3/5<br>3/8 + 2/8 = 5/8</div>
+            <h3>⚠️ Ingat!</h3>
+            <p>Penyebut <strong>JANGAN</strong> dijumlahkan!</p>
+        `
+    },
+    {
+        title: "Penjumlahan Penyebut Berbeda",
+        icon: "➕",
+        demo: { n1: 1, d1: 2, op: '+', n2: 1, d2: 3, result: { n: 5, d: 6 } },
+        visualLabel: "1/2 + 1/3 = 5/6",
+        content: `
+            <h3>🍕 Penyebut Berbeda</h3>
+            <p>Cari <span class="highlight">KPK</span> penyebut, ubah pecahan, lalu jumlahkan.</p>
+            <h3>📝 Langkah</h3>
+            <div class="example-box">1. Cari KPK penyebut<br>2. Samakan penyebut<br>3. Jumlahkan pembilang</div>
+            <h3>💡 Contoh</h3>
+            <div class="example-box">1/2 + 1/3<br>KPK 2,3 = 6<br>3/6 + 2/6 = <strong>5/6</strong></div>
+        `
+    },
+    {
+        title: "Pengurangan Penyebut Sama",
+        icon: "➖",
+        demo: { n1: 3, d1: 4, op: '−', n2: 1, d2: 4, result: { n: 2, d: 4 } },
+        visualLabel: "3/4 − 1/4 = 2/4",
+        content: `
+            <h3>🍕 Penyebut Sama</h3>
+            <p>Jika penyebut <span class="highlight">sama</span>, kurangkan pembilangnya saja.</p>
+            <h3>📝 Rumus</h3>
+            <div class="example-box"><strong>a/c − b/c = (a−b)/c</strong></div>
+            <h3>💡 Contoh</h3>
+            <div class="example-box">3/4 − 1/4 = 2/4<br>4/5 − 2/5 = 2/5<br>5/6 − 1/6 = 4/6</div>
+            <h3>⚠️ Ingat!</h3>
+            <p>Sederhanakan hasilnya jika bisa!</p>
+        `
+    },
+    {
+        title: "Pengurangan Penyebut Berbeda",
+        icon: "➖",
+        demo: { n1: 3, d1: 4, op: '−', n2: 1, d2: 2, result: { n: 1, d: 4 } },
+        visualLabel: "3/4 − 1/2 = 1/4",
+        content: `
+            <h3>🍕 Penyebut Berbeda</h3>
+            <p>Cari <span class="highlight">KPK</span> penyebut, ubah pecahan, lalu kurangkan.</p>
+            <h3>📝 Langkah</h3>
+            <div class="example-box">1. Cari KPK penyebut<br>2. Samakan penyebut<br>3. Kurangkan pembilang</div>
+            <h3>💡 Contoh</h3>
+            <div class="example-box">3/4 − 1/2<br>KPK 4,2 = 4<br>3/4 − 2/4 = <strong>1/4</strong></div>
+        `
+    }
+];
+
+// ================================================================
+// QUIZ DATA - 15 SOAL PER MATERI
+// ================================================================
+const quizzes = [
+    // Materi 1: Penjumlahan Penyebut Sama
+    [
+        { n1:1,d1:4,n2:2,d2:4,op:'+',options:["3/4","3/8","2/4","1/4"],answer:0,hint:"Penyebut sama → jumlahkan pembilang: 1+2=3." },
+        { n1:2,d1:5,n2:1,d2:5,op:'+',options:["3/10","3/5","2/5","1/5"],answer:1,hint:"2+1=3, penyebut tetap 5." },
+        { n1:3,d1:8,n2:2,d2:8,op:'+',options:["5/8","5/16","6/8","1/8"],answer:0,hint:"3+2=5, penyebut tetap 8." },
+        { n1:1,d1:6,n2:3,d2:6,op:'+',options:["4/12","4/6","3/6","1/6"],answer:1,hint:"1+3=4, penyebut tetap 6." },
+        { n1:2,d1:7,n2:3,d2:7,op:'+',options:["5/7","5/14","6/7","1/7"],answer:0,hint:"2+3=5, penyebut tetap 7." },
+        { n1:3,d1:9,n2:4,d2:9,op:'+',options:["7/9","7/18","6/9","1/9"],answer:0,hint:"3+4=7, penyebut tetap 9." },
+        { n1:1,d1:3,n2:1,d2:3,op:'+',options:["2/3","2/6","1/3","1/6"],answer:0,hint:"1+1=2, penyebut tetap 3." },
+        { n1:4,d1:10,n2:3,d2:10,op:'+',options:["7/10","7/20","6/10","1/10"],answer:0,hint:"4+3=7, penyebut tetap 10." },
+        { n1:2,d1:8,n2:5,d2:8,op:'+',options:["7/8","7/16","6/8","1/8"],answer:0,hint:"2+5=7, penyebut tetap 8." },
+        { n1:3,d1:5,n2:1,d2:5,op:'+',options:["4/10","4/5","3/5","1/5"],answer:1,hint:"3+1=4, penyebut tetap 5." },
+        { n1:2,d1:11,n2:5,d2:11,op:'+',options:["7/11","7/22","6/11","1/11"],answer:0,hint:"2+5=7, penyebut tetap 11." },
+        { n1:1,d1:12,n2:5,d2:12,op:'+',options:["6/12","6/24","5/12","1/12"],answer:0,hint:"1+5=6, penyebut tetap 12." },
+        { n1:3,d1:15,n2:7,d2:15,op:'+',options:["10/15","10/30","9/15","1/15"],answer:0,hint:"3+7=10, penyebut tetap 15." },
+        { n1:5,d1:20,n2:8,d2:20,op:'+',options:["13/20","13/40","12/20","1/20"],answer:0,hint:"5+8=13, penyebut tetap 20." },
+        { n1:7,d1:25,n2:9,d2:25,op:'+',options:["16/25","16/50","15/25","1/25"],answer:0,hint:"7+9=16, penyebut tetap 25." }
+    ],
+    // Materi 2: Penjumlahan Penyebut Berbeda
+    [
+        { n1:1,d1:2,n2:1,d2:3,op:'+',options:["2/5","5/6","1/6","3/6"],answer:1,hint:"KPK 2&3=6. 3/6+2/6=5/6." },
+        { n1:1,d1:3,n2:1,d2:4,op:'+',options:["2/7","7/12","1/12","3/12"],answer:1,hint:"KPK 3&4=12. 4/12+3/12=7/12." },
+        { n1:2,d1:3,n2:1,d2:4,op:'+',options:["3/7","11/12","3/12","8/12"],answer:1,hint:"KPK 3&4=12. 8/12+3/12=11/12." },
+        { n1:1,d1:2,n2:2,d2:5,op:'+',options:["3/7","9/10","3/10","7/10"],answer:1,hint:"KPK 2&5=10. 5/10+4/10=9/10." },
+        { n1:3,d1:4,n2:1,d2:2,op:'+',options:["4/6","5/4","4/4","3/4"],answer:1,hint:"KPK 4&2=4. 3/4+2/4=5/4." },
+        { n1:2,d1:5,n2:1,d2:3,op:'+',options:["3/8","11/15","3/15","8/15"],answer:1,hint:"KPK 5&3=15. 6/15+5/15=11/15." },
+        { n1:1,d1:4,n2:1,d2:5,op:'+',options:["2/9","9/20","2/20","5/20"],answer:1,hint:"KPK 4&5=20. 5/20+4/20=9/20." },
+        { n1:5,d1:6,n2:1,d2:3,op:'+',options:["6/9","7/6","6/6","5/6"],answer:1,hint:"KPK 6&3=6. 5/6+2/6=7/6." },
+        { n1:1,d1:2,n2:1,d2:4,op:'+',options:["2/6","3/4","1/4","2/4"],answer:1,hint:"KPK 2&4=4. 2/4+1/4=3/4." },
+        { n1:2,d1:3,n2:1,d2:6,op:'+',options:["3/9","5/6","3/6","1/2"],answer:1,hint:"KPK 3&6=6. 4/6+1/6=5/6." },
+        { n1:3,d1:5,n2:1,d2:2,op:'+',options:["4/7","11/10","4/10","8/10"],answer:1,hint:"KPK 5&2=10. 6/10+5/10=11/10." },
+        { n1:1,d1:3,n2:2,d2:9,op:'+',options:["3/12","5/9","3/9","1/9"],answer:1,hint:"KPK 3&9=9. 3/9+2/9=5/9." },
+        { n1:2,d1:7,n2:1,d2:3,op:'+',options:["3/10","13/21","3/21","10/21"],answer:1,hint:"KPK 7&3=21. 6/21+7/21=13/21." },
+        { n1:1,d1:6,n2:1,d2:8,op:'+',options:["2/14","7/24","2/24","5/24"],answer:1,hint:"KPK 6&8=24. 4/24+3/24=7/24." },
+        { n1:3,d1:10,n2:1,d2:4,op:'+',options:["4/14","11/20","4/20","7/20"],answer:1,hint:"KPK 10&4=20. 6/20+5/20=11/20." }
+    ],
+    // Materi 3: Pengurangan Penyebut Sama
+    [
+        { n1:3,d1:4,n2:1,d2:4,op:'−',options:["2/4","1/2","2/8","1/4"],answer:0,hint:"3−1=2, penyebut tetap 4." },
+        { n1:4,d1:5,n2:2,d2:5,op:'−',options:["2/10","2/5","6/5","1/5"],answer:1,hint:"4−2=2, penyebut tetap 5." },
+        { n1:5,d1:6,n2:1,d2:6,op:'−',options:["4/12","4/6","6/6","1/6"],answer:1,hint:"5−1=4, penyebut tetap 6." },
+        { n1:7,d1:8,n2:3,d2:8,op:'−',options:["4/16","4/8","3/8","1/8"],answer:1,hint:"7−3=4, penyebut tetap 8." },
+        { n1:5,d1:9,n2:2,d2:9,op:'−',options:["3/18","3/9","2/9","1/9"],answer:1,hint:"5−2=3, penyebut tetap 9." },
+        { n1:6,d1:10,n2:4,d2:10,op:'−',options:["2/20","2/10","4/10","1/10"],answer:1,hint:"6−4=2, penyebut tetap 10." },
+        { n1:8,d1:12,n2:5,d2:12,op:'−',options:["3/24","3/12","5/12","1/12"],answer:1,hint:"8−5=3, penyebut tetap 12." },
+        { n1:5,d1:7,n2:3,d2:7,op:'−',options:["2/14","2/7","3/7","1/7"],answer:1,hint:"5−3=2, penyebut tetap 7." },
+        { n1:4,d1:6,n2:1,d2:6,op:'−',options:["3/12","3/6","2/6","1/6"],answer:1,hint:"4−1=3, penyebut tetap 6." },
+        { n1:9,d1:11,n2:4,d2:11,op:'−',options:["5/22","5/11","4/11","1/11"],answer:1,hint:"9−4=5, penyebut tetap 11." },
+        { n1:7,d1:13,n2:2,d2:13,op:'−',options:["5/26","5/13","4/13","1/13"],answer:1,hint:"7−2=5, penyebut tetap 13." },
+        { n1:8,d1:15,n2:3,d2:15,op:'−',options:["5/30","5/15","3/15","1/15"],answer:1,hint:"8−3=5, penyebut tetap 15." },
+        { n1:11,d1:20,n2:6,d2:20,op:'−',options:["5/40","5/20","6/20","1/20"],answer:1,hint:"11−6=5, penyebut tetap 20." },
+        { n1:15,d1:24,n2:7,d2:24,op:'−',options:["8/48","8/24","7/24","1/24"],answer:1,hint:"15−7=8, penyebut tetap 24." },
+        { n1:19,d1:30,n2:9,d2:30,op:'−',options:["10/60","10/30","9/30","1/30"],answer:1,hint:"19−9=10, penyebut tetap 30." }
+    ],
+    // Materi 4: Pengurangan Penyebut Berbeda
+    [
+        { n1:3,d1:4,n2:1,d2:2,op:'−',options:["2/2","1/4","2/4","1/2"],answer:1,hint:"KPK 4&2=4. 3/4−2/4=1/4." },
+        { n1:1,d1:2,n2:1,d2:3,op:'−',options:["1/6","2/6","1/3","2/3"],answer:0,hint:"KPK 2&3=6. 3/6−2/6=1/6." },
+        { n1:2,d1:3,n2:1,d2:4,op:'−',options:["1/12","5/12","3/12","1/7"],answer:1,hint:"KPK 3&4=12. 8/12−3/12=5/12." },
+        { n1:3,d1:5,n2:1,d2:2,op:'−',options:["2/3","1/10","2/10","1/5"],answer:1,hint:"KPK 5&2=10. 6/10−5/10=1/10." },
+        { n1:5,d1:6,n2:1,d2:3,op:'−',options:["4/3","1/2","4/6","1/6"],answer:1,hint:"KPK 6&3=6. 5/6−2/6=3/6=1/2." },
+        { n1:7,d1:8,n2:1,d2:4,op:'−',options:["6/4","5/8","6/8","1/2"],answer:1,hint:"KPK 8&4=8. 7/8−2/8=5/8." },
+        { n1:3,d1:4,n2:1,d2:5,op:'−',options:["2/1","11/20","2/20","1/20"],answer:1,hint:"KPK 4&5=20. 15/20−4/20=11/20." },
+        { n1:7,d1:10,n2:2,d2:5,op:'−',options:["5/5","3/10","5/10","1/2"],answer:1,hint:"KPK 10&5=10. 7/10−4/10=3/10." },
+        { n1:5,d1:6,n2:1,d2:2,op:'−',options:["4/4","1/3","4/6","2/6"],answer:1,hint:"KPK 6&2=6. 5/6−3/6=2/6=1/3." },
+        { n1:2,d1:3,n2:1,d2:6,op:'−',options:["1/3","1/2","3/6","1/6"],answer:1,hint:"KPK 3&6=6. 4/6−1/6=3/6=1/2." },
+        { n1:4,d1:5,n2:1,d2:3,op:'−',options:["3/2","7/15","3/15","1/5"],answer:1,hint:"KPK 5&3=15. 12/15−5/15=7/15." },
+        { n1:5,d1:8,n2:1,d2:3,op:'−',options:["4/5","7/24","4/24","1/24"],answer:1,hint:"KPK 8&3=24. 15/24−8/24=7/24." },
+        { n1:3,d1:7,n2:1,d2:4,op:'−',options:["2/3","5/28","2/28","1/28"],answer:1,hint:"KPK 7&4=28. 12/28−7/28=5/28." },
+        { n1:7,d1:9,n2:1,d2:3,op:'−',options:["6/6","4/9","6/9","1/3"],answer:1,hint:"KPK 9&3=9. 7/9−3/9=4/9." },
+        { n1:5,d1:12,n2:1,d2:4,op:'−',options:["4/8","1/6","4/12","1/3"],answer:1,hint:"KPK 12&4=12. 5/12−3/12=2/12=1/6." }
+    ]
+];
+
+// ================================================================
+// STATE
+// ================================================================
+let state = {
+    player: 'Adam',
+    avatar: '👦',
+    currentMaterial: 0,
+    currentQuestion: 0,
+    benar: 0,
+    salah: 0,
+    streak: 0,
+    skor: 0,
+    answered: false,
+    hintUsed: false
+};
+
+// ================================================================
+// SCREEN MGMT
+// ================================================================
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function selectChar(name) {
+    state.player = name;
+    state.avatar = characters[name].avatar;
+    document.getElementById('playerAvatar').textContent = state.avatar;
+    document.getElementById('playerName').textContent = name;
+    playSound('select');
+    showScreen('screenMenu');
+}
+
+function changeCharacter() { playSound('click'); showScreen('screenChar'); }
+function backToMenu() { playSound('click'); showScreen('screenMenu'); }
+
+// ================================================================
+// MATERIAL
+// ================================================================
+function openMaterial(index) {
+    playSound('click');
+    state.currentMaterial = index;
+    const m = materials[index];
+
+    document.getElementById('matIcon').textContent = m.icon;
+    document.getElementById('matTitle').textContent = m.title;
+
+    const demo = m.demo;
+    document.getElementById('matVisual').innerHTML = `
+        ${renderCircleFraction(demo.n1, demo.d1, '#ff6b9d')}
+        ${renderFractionLabel(demo.n1, demo.d1)}
+        <span class="operator">${demo.op}</span>
+        ${renderCircleFraction(demo.n2, demo.d2, '#00bbf9')}
+        ${renderFractionLabel(demo.n2, demo.d2)}
+        <span class="operator">=</span>
+        ${renderCircleFraction(demo.result.n, demo.result.d, '#ffd200')}
+        ${renderFractionLabel(demo.result.n, demo.result.d)}
+    `;
+    document.getElementById('matVisualLabel').textContent = m.visualLabel;
+    document.getElementById('matText').innerHTML = m.content;
+
+    showScreen('screenMaterial');
+}
+
+// ================================================================
+// QUIZ
+// ================================================================
+function startQuiz() {
+    playSound('start');
+    state.currentQuestion = 0;
+    state.benar = 0;
+    state.salah = 0;
+    state.streak = 0;
+    state.skor = 0;
+    state.answered = false;
+    state.hintUsed = false;
+
+    const labels = ['P. Sama', 'P. Beda', 'K. Sama', 'K. Beda'];
+    document.getElementById('qTopicLabel').textContent = labels[state.currentMaterial];
+    updateQuizHUD();
+    showScreen('screenQuiz');
+    renderQuestion();
+}
+
+function updateQuizHUD() {
+    document.getElementById('qBenar').textContent = state.benar;
+    document.getElementById('qSalah').textContent = state.salah;
+}
+
+function renderQuestion() {
+    const questions = quizzes[state.currentMaterial];
+    const q = questions[state.currentQuestion];
+    const total = questions.length;
+
+    document.getElementById('qProgressText').textContent = `${state.currentQuestion + 1}/${total}`;
+    document.getElementById('qProgressFill').style.width = ((state.currentQuestion) / total * 100) + '%';
+
+    document.getElementById('quizQText').innerHTML = `
+        ${q.n1}/${q.d1} ${q.op} ${q.n2}/${q.d2} = ?
+    `;
+
+    document.getElementById('quizVisual').innerHTML = `
+        ${renderCircleFraction(q.n1, q.d1, '#ff6b9d')}
+        ${renderFractionLabel(q.n1, q.d1)}
+        <span class="operator">${q.op}</span>
+        ${renderCircleFraction(q.n2, q.d2, '#00bbf9')}
+        ${renderFractionLabel(q.n2, q.d2)}
+    `;
+
+    const optContainer = document.getElementById('quizOptions');
+    optContainer.innerHTML = '';
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${opt}</span>`;
+        btn.onclick = () => checkAnswer(i, btn, q);
+        optContainer.appendChild(btn);
+    });
+
+    document.getElementById('quizFeedback').className = 'quiz-feedback';
+    document.getElementById('quizHint').className = 'hint-box';
+    document.getElementById('quizHint').innerHTML = '';
+    document.getElementById('btnQuizNext').disabled = true;
+    state.answered = false;
+    state.hintUsed = false;
+
+    document.getElementById('quizVisualBox').className = 'quiz-visual-mini';
+}
+
+function checkAnswer(selected, btnElement, q) {
+    if (state.answered) return;
+    state.answered = true;
+
+    const allBtns = document.querySelectorAll('.quiz-option');
+    allBtns.forEach(b => b.disabled = true);
+    allBtns[q.answer].classList.add('correct');
+
+    const feedback = document.getElementById('quizFeedback');
+    const isCorrect = selected === q.answer;
+    const visualBox = document.getElementById('quizVisualBox');
+
+    if (isCorrect) {
+        btnElement.classList.add('correct');
+        state.benar++;
+        state.streak++;
+        const poin = state.hintUsed ? 5 : 10;
+        state.skor += poin;
+
+        visualBox.classList.add('flash-correct');
+        document.getElementById('scoreBenar').classList.add('pulse');
+        setTimeout(() => document.getElementById('scoreBenar').classList.remove('pulse'), 500);
+
+        let streakText = state.streak >= 3 ? ` 🔥 x${state.streak}!` : '';
+
+        feedback.className = 'quiz-feedback show benar';
+        feedback.innerHTML = `
+            <span class="feedback-title">🎉 BENAR! +${poin}${streakText}</span>
+            💡 ${q.hint}
+        `;
+
+        showFullscreenFeedback(true, poin, state.streak);
+        playSound('benar');
+        if (state.streak >= 3) setTimeout(() => playSound('streak'), 350);
+        showConfetti();
+    } else {
+        btnElement.classList.add('wrong');
+        state.salah++;
+        state.streak = 0;
+
+        visualBox.classList.add('flash-wrong');
+        document.getElementById('screenQuiz').classList.add('screen-shake');
+        setTimeout(() => document.getElementById('screenQuiz').classList.remove('screen-shake'), 400);
+
+        document.getElementById('scoreSalah').classList.add('pulse');
+        setTimeout(() => document.getElementById('scoreSalah').classList.remove('pulse'), 500);
+
+        feedback.className = 'quiz-feedback show salah';
+        feedback.innerHTML = `
+            <span class="feedback-title">😔 BELUM TEPAT</span>
+            Jawaban: <strong>${q.options[q.answer]}</strong> • 💡 ${q.hint}
+        `;
+
+        showFullscreenFeedback(false, 0, 0);
+        playSound('salah');
+    }
+
+    updateQuizHUD();
+    document.getElementById('btnQuizNext').disabled = false;
+}
+
+function showFullscreenFeedback(isCorrect, points, streak) {
+    const overlay = document.getElementById('feedbackOverlay');
+    const emoji = document.getElementById('fbEmoji');
+    const text = document.getElementById('fbText');
+    const pointsEl = document.getElementById('fbPoints');
+
+    if (isCorrect) {
+        overlay.className = 'feedback-overlay show correct';
+        if (streak >= 5) { emoji.textContent = '🏆'; text.textContent = 'LUAR BIASA!'; }
+        else if (streak >= 3) { emoji.textContent = '🌟'; text.textContent = 'HEBAT!'; }
+        else { emoji.textContent = '✅'; text.textContent = 'BENAR!'; }
+        pointsEl.textContent = `+${points} POIN`;
+    } else {
+        overlay.className = 'feedback-overlay show wrong';
+        emoji.textContent = '❌';
+        text.textContent = 'COBA LAGI!';
+        pointsEl.textContent = 'SEMANGAT!';
+    }
+
+    setTimeout(() => overlay.classList.remove('show'), 1300);
+}
+
+function showQuizHint() {
+    if (state.answered) return;
+    const q = quizzes[state.currentMaterial][state.currentQuestion];
+    const hintBox = document.getElementById('quizHint');
+    hintBox.className = 'hint-box show';
+    hintBox.innerHTML = `💡 <strong>Petunjuk:</strong> ${q.hint}`;
+    state.hintUsed = true;
+    playSound('hint');
+}
+
+function nextQuizQuestion() {
+    playSound('click');
+    state.currentQuestion++;
+    if (state.currentQuestion >= quizzes[state.currentMaterial].length) {
+        showResult();
+    } else {
+        renderQuestion();
+    }
+}
+
+// ================================================================
+// RESULT
+// ================================================================
+function showResult() {
+    showScreen('screenResult');
+    document.getElementById('qProgressFill').style.width = '100%';
+
+    document.getElementById('resultBenar').textContent = state.benar;
+    document.getElementById('resultSalah').textContent = state.salah;
+    document.getElementById('resultSkor').textContent = state.skor;
+
+    const persen = (state.benar / 15) * 100;
+    let trophy, title, message;
+
+    if (persen >= 90) {
+        trophy = '🏆'; title = 'LUAR BIASA!';
+        message = 'Kamu <strong>Master Pecahan</strong>! 🍕✨';
+        playSound('win'); showConfettiBig();
+    } else if (persen >= 70) {
+        trophy = '🥈'; title = 'HEBAT!';
+        message = 'Kamu sudah <strong>sangat baik</strong>! 💪';
+        playSound('win');
+    } else if (persen >= 50) {
+        trophy = '🥉'; title = 'BAGUS!';
+        message = 'Ayo baca materi lagi dan coba! 🚀';
+        playSound('levelUp');
+    } else {
+        trophy = '📚'; title = 'AYO BELAJAR LAGI!';
+        message = 'Baca materi dengan teliti ya! 💡';
+        playSound('levelUp');
+    }
+
+    document.getElementById('resultTrophy').textContent = trophy;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultMessage').innerHTML = message;
+}
+
+function retryQuiz() { playSound('click'); startQuiz(); }
+
+// ================================================================
+// AUDIO
+// ================================================================
+let audioCtx = null;
+function initAudio() {
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch (e) { }
+    }
+    return audioCtx;
+}
+
+function playTone(freq, duration, type = 'sine', vol = 0.15) {
+    try {
+        const ctx = initAudio();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.start(now);
+        osc.stop(now + duration);
+    } catch (e) { }
+}
+
+function playCorrectSound() {
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => playTone(f, 0.18, 'sine', 0.16), i * 80));
+    setTimeout(() => playTone(261.63, 0.4, 'sine', 0.1), 0);
+    setTimeout(() => playTone(1567.98, 0.15, 'sine', 0.08), 400);
+}
+
+function playWrongSound() {
+    [392, 349.23, 311.13, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'triangle', 0.14), i * 120));
+    setTimeout(() => playTone(130.81, 0.5, 'sine', 0.1), 250);
+}
+
+function playStreakSound() {
+    [1318.51, 1567.98, 2093.00].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.12), i * 70));
+}
+
+function playSound(type) {
+    switch (type) {
+        case 'select': [523.25, 659.25, 783.99].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.14), i * 70)); break;
+        case 'benar': playCorrectSound(); break;
+        case 'salah': playWrongSound(); break;
+        case 'streak': playStreakSound(); break;
+        case 'click': playTone(1200, 0.05, 'square', 0.08); break;
+        case 'hint': [880, 1174.66].forEach((f, i) => setTimeout(() => playTone(f, 0.12, 'sine', 0.12), i * 100)); break;
+        case 'start': [523.25, 659.25, 783.99].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.14), i * 100)); break;
+        case 'levelUp': [587.33, 783.99, 987.77].forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.14), i * 120)); break;
+        case 'win': [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.16), i * 140)); break;
+    }
+}
+
+// ================================================================
+// CONFETTI
+// ================================================================
+function showConfetti() {
+    const colors = ['#ffd200', '#ff6b9d', '#00bbf9', '#f7971e'];
+    for (let i = 0; i < 25; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-20px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDelay = (Math.random() * 0.3) + 's';
+        c.style.boxShadow = '0 0 8px currentColor';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+function showConfettiBig() {
+    const colors = ['#ffd200', '#ff6b9d', '#00bbf9', '#f7971e', '#ff5757'];
+    for (let i = 0; i < 70; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-20px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDelay = (Math.random() * 1) + 's';
+        c.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
+        c.style.boxShadow = '0 0 10px currentColor';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 4500);
+    }
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => { showScreen('screenChar'); });
+
+// Inisialisasi audio pada interaksi pertama
+document.addEventListener('touchstart', () => { initAudio(); }, { once: true });
+document.addEventListener('click', () => { initAudio(); }, { once: true });
+</script>
+
+</body>
+</html>
